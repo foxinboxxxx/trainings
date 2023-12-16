@@ -1,0 +1,6 @@
+.idea
+flask-env
+__pycache__
+flask_tutorial/flask-getting-started
+flask_tutorial/venv
+flask_tutorial/ex
