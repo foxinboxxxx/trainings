@@ -1,0 +1,6 @@
+- When try to paste the code in input field and submit
+
+Jinja by default escapes all the text tha's displayed on the page
+as a Jinja variable.
+Jinja replaces < and > signs with HTML escape codes
+
