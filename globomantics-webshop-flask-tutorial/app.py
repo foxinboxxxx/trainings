@@ -1,15 +1,18 @@
 from flask import Flask, render_template, request, redirect, url_for, g, flash
 from flask_wtf import FlaskForm
-from wtforms import StringField, TextAreaField, SubmitField
+from wtforms import StringField, TextAreaField, SubmitField, SelectField, DecimalField
+from wtforms.validators import InputRequired, DataRequired, Length
 import sqlite3
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = "secretkey"
 
 class NewItemForm(FlaskForm):
-    title       = StringField("Title")
-    price       = StringField("Price")
-    description = TextAreaField("Description")
+    title       = StringField("Title", validators=[InputRequired("Input is required"), DataRequired("Data is required"), Length(min=5, max=20, message="Length between 5 and 20")])
+    price       = DecimalField("Price")
+    description = TextAreaField("Description", validators=[InputRequired("Input is required"), DataRequired("Data is required"), Length(min=5, max=40, message="Length between 5 and 40")])
+    category    = SelectField("Category", coerce=int)
+    subcategory = SelectField("Subcategory", coerce=int)
     submit      = SubmitField("Submit")
 
 @app.route("/")
@@ -47,7 +50,20 @@ def new_item():
     c = conn.cursor()
     form = NewItemForm()
 
-    if request.method == "POST":
+    c.execute("SELECT id, name FROM categories")
+    categories = c.fetchall()
+    # [(1, 'Food'), (2, 'Technology'), (3, 'Books')] - numbers are integers
+    # coerce will convert to int
+    form.category.choices = categories
+
+    c.execute("""SELECT id, name FROM subcategories
+                    WHERE category_id = ?""",
+                    (1,)
+    )
+    subcategories = c.fetchall()
+    form.subcategory.choices = subcategories
+
+    if form.validate_on_submit():
         print("Form data:")
         print("Title: {}, Price: {}, Description: {}".format(
             request.form.get("title"),request.form.get("price"), request.form.get("description")
@@ -60,14 +76,17 @@ def new_item():
                         form.description.data,
                         float(form.price.data),
                         "",
-                        1,
-                        1
+                        form.category.data,
+                        form.subcategory.data
                     )
         )
         conn.commit()
         flash("Item {} has been successfully submitted".format(request.form.get("title")), "success")
         return redirect(url_for("home"))
     
+    if form.errors:
+        flash("{}".format(form.errors), "danger")
+
     return render_template("new_item.html", form=form)
 
 def get_db():

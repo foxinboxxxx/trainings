@@ -27,6 +27,14 @@
         <!-- <label>Description</label>
         <textarea class="form-control" name="description" rows="3"></textarea> -->
       </div>
+      <div> 
+        {{ form.category.label }}
+        {{ form.category(class="form-control") }}
+      </div>
+      <div> 
+        {{ form.subcategory.label }}
+        {{ form.subcategory(class="form-control") }}
+      </div>
     </hr>
     {{ form.submit(class="btn btn-primary form-control") }}
     <!-- <input class="btn btn-primary form-control" type="submit" value="Submit"> -->
