@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for, g, flash, send_from_directory
+from flask import Flask, jsonify, render_template, request, redirect, url_for, g, flash, send_from_directory
 from flask_wtf import FlaskForm, RecaptchaField
 from flask_wtf.file import FileAllowed, FileRequired
 from wtforms import StringField, TextAreaField, SubmitField, SelectField, DecimalField, FileField
@@ -234,7 +234,7 @@ def home():
     form.category.choices = categories
 
     # ? marks are used against SQL injections
-    c.execute("SELECT id, name FROM subcategories WHERE category_id = ?", (1,))
+    c.execute("SELECT id, name FROM subcategories")
     subcategories = c.fetchall()
     subcategories.insert(0, (0, "---"))
     form.subcategory.choices = subcategories
@@ -314,10 +314,7 @@ def new_item():
     # coerce will convert to int
     form.category.choices = categories
 
-    c.execute("""SELECT id, name FROM subcategories
-                    WHERE category_id = ?""",
-                    (1,)
-    )
+    c.execute("SELECT id, name FROM subcategories")
     subcategories = c.fetchall()
     form.subcategory.choices = subcategories
 
@@ -346,6 +343,17 @@ def new_item():
     # if form.errors:
     #     flash("{}".format(form.errors), "danger")
     return render_template("new_item.html", form=form)
+
+@app.route("/category/<int:category_id>")
+def category(category_id):
+    c = get_db().cursor()
+    c.execute("""SELECT id, name FROM subcategories
+                 WHERE category_id = ?""",
+                 (category_id,)
+    )
+    subcategories = c.fetchall()
+
+    return jsonify(subcategories=subcategories)
 
 def save_image_upload(image):
     format = "%Y%m%dT%H%M%S"
