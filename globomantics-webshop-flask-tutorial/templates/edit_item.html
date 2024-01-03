@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-
+{% from "_error_messages.html" import field_error_messages, error_messages %}
 {% block title %}Edit {{ item.title }} - {% endblock %}
 
 {% block content %}
@@ -10,6 +10,7 @@
     </h1><hr>
     <form method="POST" action="{{ url_for('edit_item', item_id=item.id) }}" enctype="multipart/form-data">
       {{ form.hidden_tag() }}
+      {{ error_messages(form.errors) }}
       <div class="form-group">
         {{ form.title.label }}
         {{ form.title(class="form-control") }}
