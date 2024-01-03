@@ -1,9 +1,9 @@
 from flask import Flask, render_template, request, redirect, url_for, g, flash, send_from_directory
-from flask_wtf import FlaskForm
+from flask_wtf import FlaskForm, RecaptchaField
 from flask_wtf.file import FileAllowed, FileRequired
 from wtforms import StringField, TextAreaField, SubmitField, SelectField, DecimalField, FileField
 from wtforms.validators import InputRequired, DataRequired, Length, ValidationError
-from werkzeug.utils import secure_filename
+from werkzeug.utils import secure_filename, escape
 import sqlite3
 import os
 import datetime
@@ -16,6 +16,8 @@ app.config['SECRET_KEY'] = "secretkey"
 app.config["ALLOWED_IMAGE_EXTENSIONS"] = ["jpeg", "jpg", "png"]
 app.config["MAX_CONTENT_LENGTH"] = 16 * 1024 * 1024
 app.config["IMAGE_UPLOADS"] = os.path.join(basedir, "uploads")
+# app.config["RECAPTCHA_PUBLIC_KEY"] = ""
+# app.config["RECAPTCHA_PRIVATE_KEY"] = ""
 
 class BelongsToOtherFieldOption:
     def __init__(self, table, belongs_to, foreign_key=None, message=None):
@@ -66,13 +68,14 @@ class ItemForm(FlaskForm):
     price       = DecimalField("Price")
     description = TextAreaField("Description", validators=[InputRequired("Input is required"), DataRequired("Data is required"), Length(min=5, max=40, message="Length between 5 and 40")])
     image       = FileField("Image", validators=[FileRequired(), FileAllowed(app.config["ALLOWED_IMAGE_EXTENSIONS"], "Images only!")])
+    # recaptcha   = RecaptchaField()
 
 class NewItemForm(ItemForm):
     category    = SelectField("Category", coerce=int)
     subcategory = SelectField("Subcategory", coerce=int, validators=[BelongsToOtherFieldOption(table="subcategories", belongs_to="category", message="Subcategory does not belong to that category.")])
     submit      = SubmitField("Submit")
 
-class DeleteItemForm(ItemForm):
+class DeleteItemForm(FlaskForm):
     submit      = SubmitField("Delete item")
 
 class EditItemForm(ItemForm):
@@ -114,8 +117,8 @@ def edit_item(item_id):
             title = ?, description = ?, price = ?, image = ?
             WHERE id = ?""",
                 (
-                    form.title.data,
-                    form.description.data,
+                    escape(form.title.data),
+                    escape(form.description.data),
                     float(form.price.data),
                     filename,
                     item_id
@@ -207,6 +210,7 @@ def home():
     categories.insert(0, (0, "---"))
     form.category.choices = categories
 
+    # ? marks are used against SQL injections
     c.execute("SELECT id, name FROM subcategories WHERE category_id = ?", (1,))
     subcategories = c.fetchall()
     subcategories.insert(0, (0, "---"))
@@ -227,7 +231,7 @@ def home():
 
         if form.title.data.strip():
             filter_queries.append("i.title LIKE ?")
-            parameters.append("%" + form.title.data + "%")
+            parameters.append("%" + escape(form.title.data) + "%")
 
         if form.category.data:
             filter_queries.append("i.category_id = ?")
@@ -300,8 +304,9 @@ def new_item():
                     (title, description, price, image, category_id, subcategory_id)
                     VALUES(?,?,?,?,?,?)""",
                     (
-                        form.title.data,
-                        form.description.data,
+                        escape(form.title.data),
+                        # escape javascript inputs
+                        escape(form.description.data),
                         float(form.price.data),
                         filename,
                         form.category.data,
