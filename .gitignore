@@ -4,3 +4,5 @@ __pycache__
 flask_tutorial/venv
 flask_tutorial/ex
 globomantics-webshop-flask-tutorial/venv
+globomantics-webshop-flask-tutorial/uploads
+venv

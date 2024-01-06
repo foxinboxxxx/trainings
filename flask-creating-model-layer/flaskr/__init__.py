@@ -1,6 +1,7 @@
 import os
 
 from flask import Flask
+from flaskr.sqla import sqla
 
 
 def create_app(test_config=None):
@@ -34,6 +35,10 @@ def create_app(test_config=None):
     from . import db
 
     db.init_app(app)
+
+    app.config.from_mapping(SQLALCHEMY_DATABASE_URI=f'sqlite:///{app.config["DATABASE"]}',
+                        SQLALCHEMY_TRACK_MODIFICATIONS=False)
+    sqla.init_app(app)
 
     # apply the blueprints to the app
     from . import auth
