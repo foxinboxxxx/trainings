@@ -2,6 +2,7 @@ import os
 
 from flask import Flask
 from flaskr.sqla import sqla
+from flask_migrate import Migrate
 
 
 def create_app(test_config=None):
@@ -39,6 +40,11 @@ def create_app(test_config=None):
     app.config.from_mapping(SQLALCHEMY_DATABASE_URI=f'sqlite:///{app.config["DATABASE"]}',
                         SQLALCHEMY_TRACK_MODIFICATIONS=False)
     sqla.init_app(app)
+
+    # configure Flask-migrate
+    """Render_as_batch works around by creating new table
+    with altered schema data across and deleting old table"""
+    Migrate(app, sqla, render_as_batch=True)
 
     # apply the blueprints to the app
     from . import auth
