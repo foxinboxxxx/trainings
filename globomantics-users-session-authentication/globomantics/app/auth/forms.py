@@ -60,7 +60,7 @@ class RegistrationForm(FlaskForm):
             raise ValidationError("Email already exists.")
 
 
-class RegistrationForm(FlaskForm):
+class LoginForm(FlaskForm):
 
     email            = EmailField("Email *",
                                 validators=[
@@ -76,4 +76,4 @@ class RegistrationForm(FlaskForm):
                                     Length(min=10, max=40, message="Password must be between 10 and 40 characters long"),
                                 ])
 
-    submit           = SubmitField("Register")
+    submit           = SubmitField("Login")
