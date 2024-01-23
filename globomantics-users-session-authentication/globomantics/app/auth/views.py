@@ -3,8 +3,11 @@ from app.auth.forms import RegistrationForm
 from app import db
 from app.models import User
 from app.auth.forms import LoginForm
+from werkzeug.local import LocalProxy
 
 auth = Blueprint("auth", __name__, template_folder="templates")
+
+current_user = LocalProxy(lambda: get_current_user())
 
 @auth.route("/login", methods=["GET", "POST"])
 def login():
@@ -51,7 +54,8 @@ def register():
 
 @auth.route("/logout")
 def logout():
-    if not session.get("user_id"):
+    #if not session.get("user_id"):
+    if current_user.is_anonymous():
         flash("You are not logged in", "danger")
     else:
         logout_user()
@@ -63,6 +67,10 @@ def login_user(user):
 
 def logout_user():
     session.pop("user_id")
+
+@auth.app_context_processorcontext_processor
+def inject_current_user():
+    return dict(current_user=get_current_user())
 
 def get_current_user():
     _current_user =None
