@@ -1,4 +1,4 @@
-from flask import session, Blueprint, render_template, flash, redirect, url_for
+from flask import session, Blueprint, render_template, flash, redirect, url_for, g
 from app.auth.forms import RegistrationForm
 from app import db
 from app.models import User
@@ -73,11 +73,12 @@ def inject_current_user():
     return dict(current_user=get_current_user())
 
 def get_current_user():
-    _current_user =None
-    if session.get("user_id"):
+    # Eliminate multiple call to DB during one page view
+    _current_user =getattr(g, "_current_user", None)
+    if _current_user is None and session.get("user_id"):
         user =User.query.get(session.get("user_id"))
         if user:
-            _current_user=user
+            _current_user=g._current_user.user
     
     if _current_user is None:
         _current_user=User()
