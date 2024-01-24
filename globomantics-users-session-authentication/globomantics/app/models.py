@@ -1,5 +1,29 @@
 from app import db
 from werkzeug.security import generate_password_hash, check_password_hash
+from secrets import token_urlsafe
+
+def generate_token():
+    return token_urlsafe(20)
+
+def generate_hash(token):
+    return generate_password_hash(token)
+
+def _check_token(hash, token):
+    return check_password_hash(hash, token)
+
+class Remember(db.Model):
+    __tablename__ = "remembers"
+    id                 = db.Column(db.Integer(), primary_key=True)
+    remember_hash      = db.Column(db.String(255), nullable=False)
+    user_id            = db.Column(db.Integer(), db.ForeignKey("userd.id"), index=True, nullable=False)
+
+    def __init__(self, user_id):
+        self.token         = generate_token()
+        self.remember_hash = generate_hash(self.token)
+        self.user_id       = user_id
+
+    def check_token(self, token):
+        return _check_token(self.remember_hash, token)
 
 class User(db.Model):
     __tablename__ = "users"
@@ -10,6 +34,7 @@ class User(db.Model):
     description        = db.Column(db.Text(), nullable=False)
     location           = db.Column(db.String(255), nullable=False)
     password_hash      = db.Column(db.String(255), nullable=False)
+    remember_hashes    = db.relationship("Remember", backref="user", lazy="dynamic", cascade="all, delete-orphan")
     
     def __init__(self, username="", email="", password="", location="", description=""):
         self.username         = username
