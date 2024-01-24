@@ -15,7 +15,7 @@ class Remember(db.Model):
     __tablename__ = "remembers"
     id                 = db.Column(db.Integer(), primary_key=True)
     remember_hash      = db.Column(db.String(255), nullable=False)
-    user_id            = db.Column(db.Integer(), db.ForeignKey("userd.id"), index=True, nullable=False)
+    user_id            = db.Column(db.Integer(), db.ForeignKey("users.id"), index=True, nullable=False)
 
     def __init__(self, user_id):
         self.token         = generate_token()
