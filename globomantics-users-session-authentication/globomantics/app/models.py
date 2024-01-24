@@ -75,3 +75,6 @@ class User(db.Model):
                 if remember_hash.check_token(token):
                     return True
         return False
+    
+    def forget(self):
+        self.remember_hashes.delete()

@@ -69,10 +69,17 @@ def logout():
     #if not session.get("user_id"):
     if current_user.is_anonymous():
         flash("You are not logged in", "danger")
-    else:
-        logout_user()
-        flash("You are logger out", "success")
-    return redirect(url_for("main.home"))
+        return redirect(url_for("main.home"))
+    
+    current_user.forget()
+    db.session.commit()
+    resp = make_response(redirect(url_for("main.home")))
+    resp.set_cookie('remember_token', "", max_age=0)
+    resp.set_cookie('user_id',"", max_age=0)
+    logout_user()
+    flash("You are logger out", "success")
+    return resp
+
 
 def login_user(user):
     session["user_id"] = user.id
