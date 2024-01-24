@@ -5,10 +5,20 @@ from app.models import User
 from app.auth.forms import LoginForm
 from werkzeug.local import LocalProxy
 from itsdangerous.url_safe import URLSafeSerializer
+from functools import wraps
 
 auth = Blueprint("auth", __name__, template_folder="templates")
 
 current_user = LocalProxy(lambda: get_current_user())
+
+def login_required(f):
+    @wraps(f)
+    def _login_required(*args, **kwargs):
+        if current_user.is_anonymous():
+            flash("You need to be logged in to access this page", "danger")
+            return redirect(url_for("auth.login"))
+        return f(*args, **kwargs)
+    return _login_required
 
 @auth.route("/login", methods=["GET", "POST"])
 def login():
@@ -65,11 +75,12 @@ def register():
     return render_template("register.html", form=form)
 
 @auth.route("/logout")
+@login_required
 def logout():
-    #if not session.get("user_id"):
-    if current_user.is_anonymous():
-        flash("You are not logged in", "danger")
-        return redirect(url_for("main.home"))
+    # #if not session.get("user_id"):
+    # if current_user.is_anonymous():
+    #     flash("You are not logged in", "danger")
+    #     return redirect(url_for("main.home"))
     
     current_user.forget()
     db.session.commit()

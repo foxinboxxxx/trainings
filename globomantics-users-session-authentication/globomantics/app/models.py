@@ -11,6 +11,11 @@ def generate_hash(token):
 def _check_token(hash, token):
     return check_password_hash(hash, token)
 
+class Role:
+    ADMIN = 1
+    MUSICIAN = 2
+    EMPLOYER = 3
+
 class Remember(db.Model):
     __tablename__ = "remembers"
 
@@ -36,13 +41,15 @@ class User(db.Model):
     location           = db.Column(db.String(255), nullable=False)
     password_hash      = db.Column(db.String(255), nullable=False)
     remember_hashes    = db.relationship("Remember", backref="user", lazy="dynamic", cascade="all, delete-orphan")
-    
-    def __init__(self, username="", email="", password="", location="", description=""):
+    role_id            = db.Column(db.Integer(), default=0)
+
+    def __init__(self, username="", email="", password="", location="", description="", role_id=Role.ADMIN):
         self.username         = username
         self.email            = email
         self.password_hash    = generate_password_hash(password)
         self.location         = location
         self.description      = description
+        self.role_id          = role_id
 
     def __repr__(self):
         return '<User %r>' % self.username
@@ -78,3 +85,9 @@ class User(db.Model):
     
     def forget(self):
         self.remember_hashes.delete()
+
+    def is_admin(self):
+        return self.role_id == Role.ADMIN
+    
+    def is_role(self, role):
+        return self.role_id == role
