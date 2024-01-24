@@ -2,7 +2,6 @@
 {% set active_page = 'home' %}
 
 {% block content %}
-<!-- {% if session.get('user_id') %} -->
 {% if current_user.is_authenticated() %}
   {{ current_user.username }}<br>
   {{ current_user.description }}

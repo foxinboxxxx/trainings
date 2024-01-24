@@ -76,4 +76,5 @@ class LoginForm(FlaskForm):
                                     Length(min=10, max=40, message="Password must be between 10 and 40 characters long"),
                                 ])
 
+    remember_me      = BooleanField("Remember Me")
     submit           = SubmitField("Login")

@@ -1,9 +1,10 @@
-from flask import session, Blueprint, render_template, flash, redirect, url_for, g
+from flask import session, Blueprint, request, render_template, flash, redirect, url_for, g, make_response, current_app
 from app.auth.forms import RegistrationForm
 from app import db
 from app.models import User
 from app.auth.forms import LoginForm
 from werkzeug.local import LocalProxy
+from itsdangerous.url_safe import URLSafeSerializer
 
 auth = Blueprint("auth", __name__, template_folder="templates")
 
@@ -22,6 +23,17 @@ def login():
         if user.check_password(password):
             flash("Successfully logged in", "success")
             login_user(user)
+            if form.remember_me.data:
+                """We need to send cookies to browser.
+                Onley way to do this in Flask is attach it to cookies headeer of response.
+                """
+                resp = make_response(redirect(url_for("main.home")))
+                remember_token = user.get_remember_token()
+                db.session.commit()
+                # max_age in seconds
+                resp.set_cookie('remember_token', encrypt_cookie(remember_token), max_age=60*60*24*100)
+                resp.set_cookie('user_id', encrypt_cookie(user.id), max_age=60*60*24*100)
+                return resp
             return redirect(url_for("main.home"))
         else:
             form.password.errors.append("Password is incorrect")
@@ -75,11 +87,30 @@ def inject_current_user():
 def get_current_user():
     # Eliminate multiple call to DB during one page view
     _current_user =getattr(g, "_current_user", None)
-    if _current_user is None and session.get("user_id"):
-        user =User.query.get(session.get("user_id"))
-        if user:
-            _current_user=g._current_user = user
-    
+    if _current_user is None:
+        if session.get("user_id"):
+            user =User.query.get(session.get("user_id"))
+            if user:
+                _current_user=g._current_user = user
+        elif request.cookies.get("user_id"):
+            user = User.query.get(int(decrypt_cookie(request.cookies.get("user_id"))))
+            if user and user.check_remember_token(decrypt_cookie(request.cookies.get("remember_token"))):
+                login_user(user)
+                _current_user=g._current_user = user
+        
     if _current_user is None:
         _current_user=User()
     return _current_user
+
+def encrypt_cookie(content):
+    s = URLSafeSerializer(current_app.config["SECRET_KEY"], salt="cookie")
+    encrypted_content = s.dumps(content)
+    return encrypted_content
+
+def decrypt_cookie(encrypted_content):
+    s = URLSafeSerializer(current_app.config["SECRET_KEY"], salt="cookie")
+    try:
+        content = s.loads(encrypted_content)
+    except:
+        content="-1"
+    return content

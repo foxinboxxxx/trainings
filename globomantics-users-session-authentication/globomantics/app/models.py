@@ -13,6 +13,7 @@ def _check_token(hash, token):
 
 class Remember(db.Model):
     __tablename__ = "remembers"
+
     id                 = db.Column(db.Integer(), primary_key=True)
     remember_hash      = db.Column(db.String(255), nullable=False)
     user_id            = db.Column(db.Integer(), db.ForeignKey("users.id"), index=True, nullable=False)
@@ -62,3 +63,15 @@ class User(db.Model):
     
     def is_anonymous(self):
         return "" == self.username
+    
+    def get_remember_token(self):
+        remember_instance = Remember(self.id)
+        db.session.add(remember_instance)
+        return remember_instance.token
+    
+    def check_remember_token(self, token):
+        if token:
+            for remember_hash in self.remember_hashes:
+                if remember_hash.check_token(token):
+                    return True
+        return False
