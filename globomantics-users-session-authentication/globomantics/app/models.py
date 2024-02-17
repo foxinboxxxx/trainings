@@ -1,6 +1,9 @@
 from app import db
 from werkzeug.security import generate_password_hash, check_password_hash
 from secrets import token_urlsafe
+from sqlalchemy import event
+from slugify import slugify
+
 
 def generate_token():
     return token_urlsafe(20)
@@ -15,6 +18,29 @@ class Role:
     ADMIN = 1
     MUSICIAN = 2
     EMPLOYER = 3
+
+class Gig(db.Model):
+    __tablename__ = "gigs"
+
+    id          = db.Column(db.Integer(), primary_key=True)
+    title       = db.Column(db.String(255), nullable=False)
+    description = db.Column(db.Text())
+    payment     = db.Column(db.Float())
+    location    = db.Column(db.String(255))
+    employer_id = db.Column(db.Integer(), db.ForeignKey("users.id"), index=True, nullable=False)
+    slug        = db.Column(db.String(255), nullable=False, unique=True)
+
+    def __init__(self, title, description, payment, location, employer_id):
+        self.title         = title
+        self.description   = description
+        self.payment       = payment
+        self.location      = location
+        self.employer_id   = employer_id
+
+#Listen for changes in DB
+@event.listens_for(Gig.title, 'set')
+def update_slug(target, value, old_value, initiator):
+    target.slug = slugify(value) + "-" + token_urlsafe(3)
 
 class Remember(db.Model):
     __tablename__ = "remembers"
@@ -42,6 +68,8 @@ class User(db.Model):
     password_hash      = db.Column(db.String(255), nullable=False)
     remember_hashes    = db.relationship("Remember", backref="user", lazy="dynamic", cascade="all, delete-orphan")
     role_id            = db.Column(db.Integer(), default=0)
+    gigs               = db.relationship("Gig", backref="employer", lazy="dynamic", cascade="all, delete-orphan")
+
 
     def __init__(self, username="", email="", password="", location="", description="", role_id=Role.ADMIN):
         self.username         = username
@@ -91,3 +119,6 @@ class User(db.Model):
     
     def is_role(self, role):
         return self.role_id == role
+    
+    def is_gig_owner(self, gig):
+        return self.id == gig.employer_id
