@@ -21,6 +21,7 @@ def edit():
 	if form.validate_on_submit():
 		current_user.location 	 = escape(form.location.data)
 		current_user.description = escape(form.description.data)
+		# always use this method if need to proxy outside of application context
 		db.session.add(current_user._get_current_object())
 		db.session.commit()
 		flash("Your account has been updated.", "success")

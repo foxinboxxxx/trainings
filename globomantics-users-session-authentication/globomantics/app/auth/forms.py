@@ -47,6 +47,7 @@ class RegistrationForm(FlaskForm):
                                     DataRequired("Data is required!"),
                                     Length(min=10, max=200, message="Description must be between 10 and 200 characters long")
                                 ])
+    role             = RadioField("I am *:", coerce=int, choices=[(2, "Musician"),(3, "Employer")])
     submit           = SubmitField("Register")
 
     def validate_username(form, field):

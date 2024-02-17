@@ -1,7 +1,7 @@
 from flask import session, Blueprint, request, render_template, flash, redirect, url_for, g, make_response, current_app
 from app.auth.forms import RegistrationForm
 from app import db
-from app.models import User
+from app.models import User, Role
 from app.auth.forms import LoginForm
 from werkzeug.local import LocalProxy
 from itsdangerous.url_safe import URLSafeSerializer
@@ -19,6 +19,17 @@ def login_required(f):
             return redirect(url_for("auth.login"))
         return f(*args, **kwargs)
     return _login_required
+
+def role_required(role):
+    def _role_required(f):
+        @wraps(f)
+        def __role_required(*args, **kwargs):
+            if not current_user.is_role(role):
+                flash("You are not authorized to access this page", "danger")
+                return redirect(url_for("main.home"))
+            return f(*args, **kwargs)
+        return __role_required
+    return _role_required
 
 @auth.route("/login", methods=["GET", "POST"])
 def login():
@@ -66,7 +77,7 @@ def register():
         location    = form.location.data
         description = form.description.data
 
-        user = User(username, email, password, location, description)
+        user = User(username, email, password, location, description, role)
         db.session.add(user)
         db.session.commit()
         flash("You are registered", "success")
@@ -101,6 +112,10 @@ def logout_user():
 @auth.app_context_processor
 def inject_current_user():
     return dict(current_user=get_current_user())
+
+@auth.app_context_processor
+def inject_roles():
+    return dict(Role=Role)
 
 def get_current_user():
     # Eliminate multiple call to DB during one page view
