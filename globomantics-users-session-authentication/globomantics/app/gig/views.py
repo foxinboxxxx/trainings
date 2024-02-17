@@ -1,11 +1,23 @@
-from flask import Blueprint, render_template, flash, abort, url_for, redirect
+from flask import Blueprint, render_template, flash, abort, url_for, redirect, request
 from app.auth.views import current_user, login_required, role_required
 from app import db
 from app.models import User, Role, Gig
 from werkzeug.utils import escape, unescape
 from app.gig.forms import CreateGigForm, UpdateGigForm
+from functools import wraps
 
 gig = Blueprint("gig", __name__, template_folder="templates")
+
+
+def gig_owner_required(f):
+	@wraps(f)
+	def _gig_owner_required(*args, **kwargs):
+		gig = Gig.query.filter_by(slug=request.view_args["slug"]).first()
+		if not gig or not current_user.is_gig_owner(gig):
+			flash("You are not the owner of that gig.", "danger")
+			return redirect(url_for("main.home"))
+		return f(*args, **kwargs)
+	return _gig_owner_required
 
 @gig.route("/create", methods=["GET", "POST"])
 @login_required
@@ -30,6 +42,7 @@ def create():
 @gig.route("/edit/<slug>", methods=["GET", "POST"])
 @login_required
 @role_required(Role.EMPLOYER)
+@gig_owner_required
 def edit(slug):
 	form = UpdateGigForm()
 
@@ -55,6 +68,8 @@ def edit(slug):
 @gig.route("/delete/<slug>", methods=["POST"])
 @login_required
 @role_required(Role.EMPLOYER)
+@gig_owner_required
+
 def delete(slug):
     gig = Gig.query.filter_by(slug=slug).first()
     db.session.delete(gig)
