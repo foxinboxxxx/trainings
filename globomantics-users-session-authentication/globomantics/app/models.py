@@ -14,6 +14,11 @@ def generate_hash(token):
 def _check_token(hash, token):
     return check_password_hash(hash, token)
 
+applications = db.Table("applications",
+    db.Column("gig_id", db.Integer(), db.ForeignKey("gigs.id")),
+    db.Column("musician_id", db.Integer(), db.ForeignKey("users.id"))
+)
+
 class Role:
     ADMIN = 1
     MUSICIAN = 2
@@ -69,7 +74,10 @@ class User(db.Model):
     remember_hashes    = db.relationship("Remember", backref="user", lazy="dynamic", cascade="all, delete-orphan")
     role_id            = db.Column(db.Integer(), default=0)
     gigs               = db.relationship("Gig", backref="employer", lazy="dynamic", cascade="all, delete-orphan")
-
+    applied_gigs       = db.relationship("Gig",
+                            secondary=applications,
+                            backref=db.backref("musicians", lazy="dynamic"),
+                            lazy="dynamic")
 
     def __init__(self, username="", email="", password="", location="", description="", role_id=Role.ADMIN):
         self.username         = username
@@ -122,3 +130,13 @@ class User(db.Model):
     
     def is_gig_owner(self, gig):
         return self.id == gig.employer_id
+   
+    def is_applied_to(self, gig):
+        if gig is None:
+            return False
+        return self.applied_gigs.filter_by(id=gig.id).first() is not None
+
+    def apply(self, gig):
+        if not self.is_applied_to(gig):
+            self.applied_gigs.append(gig)
+            db.session.add(self)
