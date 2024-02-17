@@ -65,6 +65,15 @@
         {% endif %}
       </div>
       <div class="card-body">
+      {% if gigs %}
+      {% for gig in gigs %}
+        <h4><a href="{{ url_for('gig.show', slug=gig.slug) }}">{{ gig.title }}</a><h4>
+        <small>{{ gig.description }}</small>
+        <hr class="form-border">
+        {% endfor %}
+      {% else %}
+      Nothing to show
+      {% endif %}
       </div>
     </div>
     {% endif %}

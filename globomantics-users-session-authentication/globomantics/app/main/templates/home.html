@@ -2,19 +2,9 @@
 {% set active_page = 'home' %}
 
 {% block content %}
-{% if current_user.is_authenticated() %}
-  {{ current_user.username }}<br>
-  {{ current_user.description }}
 
-  <h2>Users from db:</h2>
-  {% if users %}
-  {% for user in users %}
-    {{ user.username }} {{ user.email }}
-    {% if current_user.id == user.id %}
-    <- this is the currently logged in user
-    {% endif %}<br>
-  {% endfor %}
-  {% endif %}
+{% if current_user.is_authenticated() %}
+  {% include 'home/_authenticated.html' %}
 {% else %}
   {% include 'home/_landing.html' %}
 {% endif %}
