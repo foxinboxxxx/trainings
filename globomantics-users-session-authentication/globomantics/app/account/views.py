@@ -14,8 +14,9 @@ def show(username):
 	gigs = None
 	if user.is_role(Role.EMPLOYER):
 		gigs = user.gigs.all()
+	if user.is_role(Role.MUSICIAN):
+		gigs = user.applied_gigs.all()
 	return render_template("show_account.html", user=user, gigs=gigs)
-
 
 @account.route("/edit", methods=["GET", "POST"])
 @login_required

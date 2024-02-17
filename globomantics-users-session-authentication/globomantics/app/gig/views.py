@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, flash, abort, url_for, redirect, request
+from flask import Blueprint, render_template, request, flash, abort, url_for, redirect
 from app.auth.views import current_user, login_required, role_required
 from app import db
 from app.models import User, Role, Gig
@@ -7,7 +7,6 @@ from app.gig.forms import CreateGigForm, UpdateGigForm
 from functools import wraps
 
 gig = Blueprint("gig", __name__, template_folder="templates")
-
 
 def gig_owner_required(f):
 	@wraps(f)
@@ -69,7 +68,6 @@ def edit(slug):
 @login_required
 @role_required(Role.EMPLOYER)
 @gig_owner_required
-
 def delete(slug):
     gig = Gig.query.filter_by(slug=slug).first()
     db.session.delete(gig)
@@ -80,7 +78,33 @@ def delete(slug):
 @gig.route("/info/<slug>")
 @login_required
 def show(slug):
-    gig = Gig.query.filter_by(slug=slug).first()
-    if not gig:
-        abort(404)
-    return render_template("show_gig.html", gig=gig)
+	gig = Gig.query.filter_by(slug=slug).first()
+	if not gig:
+		abort(404)
+	musicians = gig.musicians.all()
+	return render_template("show_gig.html", gig=gig, musicians=musicians)
+
+@gig.route("/my_gigs")
+@login_required
+def my_gigs():
+	gigs = None
+	if current_user.is_role(Role.MUSICIAN):
+		gigs = current_user.applied_gigs.all()
+	if current_user.is_role(Role.EMPLOYER):
+		gigs = current_user.gigs.all()
+
+	return render_template("my_gigs.html", gigs=gigs)
+
+@gig.route("/apply/<slug>", methods=["POST"])
+@login_required
+@role_required(Role.MUSICIAN)
+def apply_to_gig(slug):
+	gig = Gig.query.filter_by(slug=slug).first()
+	if not gig:
+		abort(404)
+
+	current_user.apply(gig)
+	db.session.commit()
+
+	flash("You just applied to the gig: \"" + gig.title + "\".", "success")
+	return redirect(request.referrer)
