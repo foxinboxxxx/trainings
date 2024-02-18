@@ -78,6 +78,9 @@ class User(db.Model):
                             secondary=applications,
                             backref=db.backref("musicians", lazy="dynamic"),
                             lazy="dynamic")
+    activated          = db.Column(db.Boolean(), default=False)
+    activation_hash    = db.Column(db.String(255))
+    activation_sent_at = db.Column(db.DateTime())
 
     def __init__(self, username="", email="", password="", location="", description="", role_id=Role.ADMIN):
         self.username         = username
@@ -86,6 +89,10 @@ class User(db.Model):
         self.location         = location
         self.description      = description
         self.role_id          = role_id
+        if role_id == Role.ADMIN:
+            self.activated    = True
+        else:
+            self.activated    = False
 
     def __repr__(self):
         return '<User %r>' % self.username
@@ -140,3 +147,12 @@ class User(db.Model):
         if not self.is_applied_to(gig):
             self.applied_gigs.append(gig)
             db.session.add(self)
+
+    def is_active(self):
+        return self.activated
+
+    def create_activation_token(self):
+        self.activation_token   = generate_token()
+        self.activation_hash    = generate_hash(self.activation_token)
+        self.activation_sent_at = datetime.utcnow()
+        db.session.add(self)
