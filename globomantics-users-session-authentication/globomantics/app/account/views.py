@@ -1,5 +1,5 @@
 from flask import Blueprint, render_template, flash, url_for, redirect
-from app.auth.views import current_user, login_required, logout_user
+from app.auth.views import current_user, login_required, logout_user, activation_required
 from app.models import User, Role, Gig
 from app import db
 from werkzeug.utils import escape, unescape
@@ -9,6 +9,7 @@ account = Blueprint("account", __name__, template_folder="templates")
 
 @account.route("/profile/<username>")
 @login_required
+@activation_required
 def show(username):
 	user = User.query.filter_by(username=username).first()
 	gigs = None
@@ -20,6 +21,7 @@ def show(username):
 
 @account.route("/edit", methods=["GET", "POST"])
 @login_required
+@activation_required
 def edit():
 	form = UpdateAccountForm()
 
@@ -37,6 +39,7 @@ def edit():
 	return render_template("edit_account.html", form=form)
 
 @account.route("/delete", methods=["POST"])
+@activation_required
 @login_required
 def delete():
 	db.session.delete(current_user._get_current_object())

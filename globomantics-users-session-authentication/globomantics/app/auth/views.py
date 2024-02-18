@@ -31,6 +31,15 @@ def role_required(role):
         return __role_required
     return _role_required
 
+def activation_required(f):
+    @wraps(f)
+    def _activation_required(*args, **kwargs):
+        if not current_user.is_active():
+            flash("Only activated users have access to that page.", "danger")
+            return redirect(url_for("main.home"))
+        return f(*args, **kwargs)
+    return _activation_required
+
 @auth.route("/login", methods=["GET", "POST"])
 def login():
     form = LoginForm()
@@ -76,11 +85,16 @@ def register():
         password    = form.password.data
         location    = form.location.data
         description = form.description.data
+        role        = form.role.data
 
         user = User(username, email, password, location, description, role)
         db.session.add(user)
         db.session.commit()
         flash("You are registered", "success")
+        login_user(user)
+        user.create_activation_token()
+        db.session.commit()
+        # Send activation email
         return redirect(url_for("main.home"))
 
     return render_template("register.html", form=form)

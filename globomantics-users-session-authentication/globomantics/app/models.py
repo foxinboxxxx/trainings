@@ -3,7 +3,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from secrets import token_urlsafe
 from sqlalchemy import event
 from slugify import slugify
-import datetime
+from datetime import datetime
 
 
 def generate_token():
