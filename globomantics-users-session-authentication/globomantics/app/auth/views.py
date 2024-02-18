@@ -6,6 +6,7 @@ from app.auth.forms import LoginForm
 from werkzeug.local import LocalProxy
 from itsdangerous.url_safe import URLSafeSerializer
 from functools import wraps
+from app.emails import send_activation_mail
 
 auth = Blueprint("auth", __name__, template_folder="templates")
 
@@ -94,10 +95,24 @@ def register():
         login_user(user)
         user.create_activation_token()
         db.session.commit()
+        send_activation_mail(user)
         # Send activation email
         return redirect(url_for("main.home"))
 
     return render_template("register.html", form=form)
+
+@auth.route("/activate/<token>")
+@login_required
+def activate_account(token):
+    if current_user.is_active():
+        return redirect(url_for("main.home"))
+    if current_user.activate(token):
+        db.session.commit()
+        flash("Your account is confirmed. Welcome " + current_user.username + "!", "success")
+    else:
+        flash("The confirmation link is not valid or it has expired", "danger")
+    return redirect(url_for("main.home"))
+
 
 @auth.route("/logout")
 @login_required

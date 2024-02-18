@@ -157,3 +157,12 @@ class User(db.Model):
         self.activation_hash    = generate_hash(self.activation_token)
         self.activation_sent_at = datetime.utcnow()
         db.session.add(self)
+
+    def activate(self, token):
+        days_from_sending_activation = (datetime.utcnow() - self.activation_sent_at).total_seconds()/60/60/24
+        if _check_token(self.activation_hash, token) and days_from_sending_activation < 2:
+            self.activated = True
+            self.activation_hash = ""
+            db.session.add(self)
+            return True
+        return False
