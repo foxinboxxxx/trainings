@@ -28,12 +28,14 @@
             <a href="{{ url_for('main.home') }}" class="nav-link">Home</a>
           </li>
           {% if current_user.is_authenticated() %}
+          {% if current_user.is_active() %}
           <li class="nav-item {{ 'active' if active_page == 'account' }}">
             <a href="{{ url_for('account.show', username=current_user.username) }}" class="nav-link">Account ({{ current_user.username }})</a>
           </li>
           <li class="nav-item {{ 'active' if active_page == 'my_gigs' }}">
              <a href="{{ url_for('gig.my_gigs') }}" class="nav-link">My gigs</a>
          </li>
+         {% endif %}
           <li class="nav-item">
             <a href="{{ url_for('auth.logout') }}" class="nav-link">Logout</a>
           </li>

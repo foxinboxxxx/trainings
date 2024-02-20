@@ -3,6 +3,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from secrets import token_urlsafe
 from sqlalchemy import event
 from slugify import slugify
+from datetime import datetime
 
 
 def generate_token():
@@ -78,6 +79,11 @@ class User(db.Model):
                             secondary=applications,
                             backref=db.backref("musicians", lazy="dynamic"),
                             lazy="dynamic")
+    activated          = db.Column(db.Boolean(), default=False)
+    activation_hash    = db.Column(db.String(255))
+    activation_sent_at = db.Column(db.DateTime())
+    reset_hash         = db.Column(db.String(255))
+    reset_sent_at      = db.Column(db.DateTime())  
 
     def __init__(self, username="", email="", password="", location="", description="", role_id=Role.ADMIN):
         self.username         = username
@@ -86,6 +92,10 @@ class User(db.Model):
         self.location         = location
         self.description      = description
         self.role_id          = role_id
+        if role_id == Role.ADMIN:
+            self.activated    = True
+        else:
+            self.activated    = False
 
     def __repr__(self):
         return '<User %r>' % self.username
@@ -140,3 +150,33 @@ class User(db.Model):
         if not self.is_applied_to(gig):
             self.applied_gigs.append(gig)
             db.session.add(self)
+
+    def is_active(self):
+        return self.activated
+
+    def create_activation_token(self):
+        self.activation_token   = generate_token()
+        self.activation_hash    = generate_hash(self.activation_token)
+        self.activation_sent_at = datetime.utcnow()
+        db.session.add(self)
+
+    def create_token_for(self, token_type):
+        setattr(self, token_type + "_token", generate_token())
+        setattr(self, token_type + "_hash", generate_hash(getattr(self, token_type + "_token")))
+        setattr(self, token_type + "_sent_at", datetime.utcnow())
+        db.session.add(self)
+
+    def check_reset_token(self, token):
+        minutes_from_sending_reset = (datetime.utcnow() - self.reset_sent_at).total_seconds()/60
+        if _check_token(self.reset_hash, token) and minutes_from_sending_reset < 30:
+            return True
+        return False
+
+    def activate(self, token):
+        days_from_sending_activation = (datetime.utcnow() - self.activation_sent_at).total_seconds()/60/60/24
+        if _check_token(self.activation_hash, token) and days_from_sending_activation < 2:
+            self.activated = True
+            self.activation_hash = ""
+            db.session.add(self)
+            return True
+        return False
