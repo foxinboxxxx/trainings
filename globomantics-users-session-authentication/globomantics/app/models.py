@@ -82,7 +82,8 @@ class User(db.Model):
     activated          = db.Column(db.Boolean(), default=False)
     activation_hash    = db.Column(db.String(255))
     activation_sent_at = db.Column(db.DateTime())
-    
+    reset_hash         = db.Column(db.String(255))
+    reset_sent_at      = db.Column(db.DateTime())  
 
     def __init__(self, username="", email="", password="", location="", description="", role_id=Role.ADMIN):
         self.username         = username
@@ -158,6 +159,18 @@ class User(db.Model):
         self.activation_hash    = generate_hash(self.activation_token)
         self.activation_sent_at = datetime.utcnow()
         db.session.add(self)
+
+    def create_token_for(self, token_type):
+        setattr(self, token_type + "_token", generate_token())
+        setattr(self, token_type + "_hash", generate_hash(getattr(self, token_type + "_token")))
+        setattr(self, token_type + "_sent_at", datetime.utcnow())
+        db.session.add(self)
+
+    def check_reset_token(self, token):
+        minutes_from_sending_reset = (datetime.utcnow() - self.reset_sent_at).total_seconds()/60
+        if _check_token(self.reset_hash, token) and minutes_from_sending_reset < 30:
+            return True
+        return False
 
     def activate(self, token):
         days_from_sending_activation = (datetime.utcnow() - self.activation_sent_at).total_seconds()/60/60/24
