@@ -1,6 +1,11 @@
 from flask_mail import Message
-from app import mail
-from flask import render_template, url_for
+from app import mail, celery
+from flask import render_template, url_for, current_app
+
+@celery.task
+def send_mail_with_celery(content):
+    msg = create_message(content)
+    mail.send(msg)
 
 def send_mail(to, subject, template, **kwargs):
     content = {
@@ -11,8 +16,11 @@ def send_mail(to, subject, template, **kwargs):
         "kwargs": kwargs
     }
 
-    msg = create_message(content)
-    mail.send(msg)
+    if current_app.config["SEND_MAILS_WITH_CELERY"]:
+        send_mail_with_celery.delay(content)
+    else:
+        msg = create_message(content)
+        mail.send(msg)
 
 def create_message(content):
     msg = Message(

@@ -2,10 +2,12 @@ import os
 from flask import Flask, render_template
 from flask_sqlalchemy import SQLAlchemy
 from flask_mail import Mail
+from celery import Celery
 
 basedir = os.path.abspath(os.path.dirname(__file__))
 db = SQLAlchemy()
 mail = Mail()
+celery = Celery()
 
 def create_app():
     # Application Factory
@@ -16,11 +18,14 @@ def create_app():
         SQLALCHEMY_TRACK_MODIFICATIONS=False,
         DEBUG=True,
         MAIL_SERVER="127.0.0.1",
-        MAIL_PORT=1025
+        MAIL_PORT=1025,
+        CELERY_BROKER_URL="redis://127.0.0.1:6379/0",
+        SEND_MAILS_WITH_CELERY=False
     )
 
     db.init_app(app)
     mail.init_app(app)
+    init_celery(app)
 
     from app.auth.views import auth
     from app.main.views import main
@@ -35,3 +40,14 @@ def create_app():
     app.register_error_handler(404, page_not_found)
 
     return app
+
+def init_celery(app):
+    celery.conf.broker_url = app.config["CELERY_BROKER_URL"]
+
+    class ContextTask(celery.Task):
+        def __call__(self, *args, **kwargs):
+            with app.app_context():
+                return self.run(*args, **kwargs)
+
+    celery.Task = ContextTask
+    return celery

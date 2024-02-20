@@ -1,4 +1,4 @@
-from flask import session, Blueprint, request, render_template, flash, redirect, url_for, g, make_response, current_app
+from flask import has_request_context, session, Blueprint, request, render_template, flash, redirect, url_for, g, make_response, current_app
 from app.auth.forms import UpdatePasswordForm, RegistrationForm, LoginForm, PasswordResetForm
 from app import db
 from app.models import User, Role
@@ -194,7 +194,9 @@ def logout_user():
 
 @auth.app_context_processor
 def inject_current_user():
-    return dict(current_user=get_current_user())
+    if has_request_context():
+        return dict(current_user=get_current_user())
+    return dict(current_user="")
 
 @auth.app_context_processor
 def inject_roles():
