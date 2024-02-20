@@ -82,6 +82,7 @@ class User(db.Model):
     activated          = db.Column(db.Boolean(), default=False)
     activation_hash    = db.Column(db.String(255))
     activation_sent_at = db.Column(db.DateTime())
+    
 
     def __init__(self, username="", email="", password="", location="", description="", role_id=Role.ADMIN):
         self.username         = username

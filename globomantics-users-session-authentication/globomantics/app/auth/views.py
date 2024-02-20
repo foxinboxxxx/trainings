@@ -113,6 +113,16 @@ def activate_account(token):
         flash("The confirmation link is not valid or it has expired", "danger")
     return redirect(url_for("main.home"))
 
+@auth.route("/send_activation")
+@login_required
+def send_activation():
+    if current_user.is_active():
+        return redirect(url_for("main.home"))
+    current_user.create_activation_token()
+    db.session.commit()
+    send_activation_mail(current_user)
+    flash("New email has been sent. Please use it to confirm your account.", "success")
+    return redirect(url_for("main.home"))
 
 @auth.route("/logout")
 @login_required
