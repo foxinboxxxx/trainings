@@ -6,3 +6,6 @@ flask --app flashcards run
 
 python -m flask --app flashcards run
 python -m flask --app flashcards --debug run
+
+    $ flask --app flaskr init-db
+    $ flask --app flaskr run --debug
