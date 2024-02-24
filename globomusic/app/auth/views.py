@@ -5,10 +5,7 @@ from flask_login import current_user, login_required, login_user, logout_user
 # Extension for implementing translations
 from flask_babel import _
 from flask_babel import lazy_gettext as _l
-# Other imports
-import os
-import datetime
-from app import app, db
+from app import db
 from app.models import User
 from app.auth.forms import RegistrationForm, LoginForm
 auth=Blueprint("auth", __name__, template_folder="templates")

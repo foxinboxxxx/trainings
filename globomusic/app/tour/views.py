@@ -5,7 +5,7 @@ from flask_login import current_user, login_required
 # Extension for implementing translations
 from flask_babel import _
 from flask_babel import lazy_gettext as _l
-from app import app, db
+from app import db
 from app.models import Tour
 from app.tour.forms import CreateTourForm, UpdateTourForm
 

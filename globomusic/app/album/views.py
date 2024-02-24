@@ -1,3 +1,4 @@
+from flask import current_app #proxy of current app
 # Imports from Flask
 from flask import Blueprint, render_template, send_from_directory, flash, abort, url_for, redirect
 # Extension for implementing Flask-Login for authentication
@@ -12,7 +13,7 @@ from werkzeug.utils import secure_filename
 # Other imports
 import os
 import datetime
-from app import app, db
+from app import db
 from app.models import Album
 from app.album.forms import CreateAlbumForm, UpdateAlbumForm
 
@@ -107,7 +108,7 @@ def show(slug):
 # Route for showing the uploaded images
 @album.route("/uploads/<filename>")
 def uploads(filename):
-    return send_from_directory(app.config["IMAGE_UPLOADS"], filename)
+    return send_from_directory(current_app.config["IMAGE_UPLOADS"], filename)
 
 # Method for saving an uploaded image to the uploads directory
 def save_image_upload(image):
@@ -116,5 +117,5 @@ def save_image_upload(image):
     random_string = token_hex(2)
     filename = random_string + "_" + now + "_" + image.data.filename
     filename = secure_filename(filename)
-    image.data.save(os.path.join(app.config["IMAGE_UPLOADS"], filename))
+    image.data.save(os.path.join(current_app.config["IMAGE_UPLOADS"], filename))
     return filename
