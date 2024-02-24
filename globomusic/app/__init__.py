@@ -17,7 +17,7 @@ basedir = os.path.abspath(os.path.dirname(__file__))
 
 app = Flask(__name__)
 app.config.from_object("config.{}Config".format(app.env.capitalize()))
-#print(app.config.from_object("config.{}Config".format(app.env.capitalize())))
+print("Config " + str(app.config.from_object("config.{}Config".format(app.env.capitalize()))))
 
 # DON'T DO THIS EVER EVER!!!!
 # app.config["ENV"] = "testing"
