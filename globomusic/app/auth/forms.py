@@ -7,7 +7,7 @@ from wtforms.validators import InputRequired, DataRequired, Length, ValidationEr
 from flask_babel import _
 from flask_babel import lazy_gettext as _l
 from app import app
-
+from app.models import User
 
 # Form for user registration
 class RegistrationForm(FlaskForm):
