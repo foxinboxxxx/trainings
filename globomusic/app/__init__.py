@@ -11,18 +11,17 @@ from flask_babel import Babel, _
 from flask_babel import lazy_gettext as _l
 # Other imports
 import os
+import config
 
 basedir = os.path.abspath(os.path.dirname(__file__))
 
 app = Flask(__name__)
-app.config.from_mapping(
-    SECRET_KEY=os.environ.get("FLASK_SECRET_KEY") or "prc9FWjeLYh_KsPGm0vJcg",
-    SQLALCHEMY_DATABASE_URI="sqlite:///"+ os.path.join(basedir, "globomantics.sqlite"),
-    SQLALCHEMY_TRACK_MODIFICATIONS=False,
-    MAX_CONTENT_LENGTH=16*1024*1024,
-    IMAGE_UPLOADS=os.path.join(basedir, "uploads"),
-    ALLOWED_IMAGE_EXTENSIONS=["jpeg", "jpg", "png"]
-)
+app.config.from_object("config.{}Config".format(app.env.capitalize()))
+#print(app.config.from_object("config.{}Config".format(app.env.capitalize())))
+
+# DON'T DO THIS EVER EVER!!!!
+# app.config["ENV"] = "testing"
+
 
 # Initializing extensions
 db = SQLAlchemy(app)
