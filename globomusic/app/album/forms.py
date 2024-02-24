@@ -7,7 +7,6 @@ from wtforms.fields.html5 import DateField
 from wtforms.validators import InputRequired, DataRequired, Length
 # Extension for implementing translations
 from flask_babel import lazy_gettext as _l
-from app import app
 
 
 # General Album form

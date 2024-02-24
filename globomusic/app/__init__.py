@@ -1,7 +1,5 @@
 # Imports from Flask
 from flask import Flask
-# Extension for implementing Alembic database migrations
-from flask_migrate import Migrate
 # Extension for implementing SQLAlchemy ORM
 from flask_sqlalchemy import SQLAlchemy
 # Extension for implementing Flask-Login for authentication
@@ -24,15 +22,15 @@ def create_app(config_env=""):
     app = Flask(__name__)
     if not config_env:
         config_env = app.env
-    #app.config.from_object("config.{}Config".format(app.env.capitalize()))
-    app.config.from_mapping(
-        SECRET_KEY=os.environ.get("FLASK_SECRET_KEY") or "prc9FWjeLYh_KsPGm0vJcg",
-        SQLALCHEMY_DATABASE_URI="sqlite:///"+ os.path.join(basedir, "globomantics.sqlite"),
-        SQLALCHEMY_TRACK_MODIFICATIONS=False,
-        MAX_CONTENT_LENGTH=16*1024*1024,
-        IMAGE_UPLOADS=os.path.join(basedir, "uploads"),
-        ALLOWED_IMAGE_EXTENSIONS=["jpeg", "jpg", "png"]
-    )
+    app.config.from_object("config.{}Config".format(app.env.capitalize()))
+    # app.config.from_mapping(
+    #     SECRET_KEY=os.environ.get("FLASK_SECRET_KEY") or "prc9FWjeLYh_KsPGm0vJcg",
+    #     SQLALCHEMY_DATABASE_URI="sqlite:///"+ os.path.join(basedir, "globomantics.sqlite"),
+    #     SQLALCHEMY_TRACK_MODIFICATIONS=False,
+    #     MAX_CONTENT_LENGTH=16*1024*1024,
+    #     IMAGE_UPLOADS=os.path.join(basedir, "uploads"),
+    #     ALLOWED_IMAGE_EXTENSIONS=["jpeg", "jpg", "png"]
+    # )
     print("Config " + str("config.{}Config".format(config_env.capitalize())))
 
     # DON'T DO THIS EVER EVER!!!!
@@ -53,15 +51,14 @@ def create_app(config_env=""):
     with app.app_context():
         from app.album.views import album
         app.register_blueprint(album, url_prefix="/album")
-        from app.tour.views import tour
-        app.register_blueprint(tour, url_prefix="/tour")
+        from app.main.views import main
+        app.register_blueprint(main)
     from app.auth.views import auth
     app.register_blueprint(auth)
-    from app.main.views import main
-    app.register_blueprint(main)
+    from app.tour.views import tour
+    app.register_blueprint(tour, url_prefix="/tour")
 
     from app.main.views import page_not_found
     app.register_error_handler(404, page_not_found)
 
-    
     return app
