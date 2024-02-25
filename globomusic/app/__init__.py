@@ -19,6 +19,9 @@ babel = Babel()
 login_manager = LoginManager()
 
 def create_app(config_env=""):
+    # Context objects pushed to stack automatically by Flask.
+    # When the application instance gets created, both stacks are created too.
+    # The request context is pushed whenever a new request comes in.
     app = Flask(__name__)
     if not config_env:
         config_env = app.env

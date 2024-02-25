@@ -1,12 +1,15 @@
 import os
 import unittest
 from config import basedir
-from app import app, db
+from app import create_app, db
 from app.models import User
 
 class TestExample(unittest.TestCase):
     def setUp(self):
         # Happens before each test
+        app = create_app("testing")
+        self.app_ctx = app.app_context()
+        self.app_ctx.push()
         self.app_test_client = app.test_client()
         db.create_all()
 
@@ -14,6 +17,7 @@ class TestExample(unittest.TestCase):
         # Happens after each test
         db.session.remove()
         db.drop_all()
+        self.app_ctx.pop()
 
     def test_home_route(self):
         resp = self.app_test_client.get("/")
