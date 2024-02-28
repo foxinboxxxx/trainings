@@ -38,6 +38,18 @@
                 </a>
               </li>
               {% else %}
+              {% if current_user.is_admin %}
+              <li class="nav-item">
+                <a class="nav-link {{ 'active' if active_page == 'admin_album' }}" href="{{ url_for('admin.album_table') }}">
+                  Manage album model
+                </a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link {{ 'active' if active_page == 'admin_tour' }}" href="{{ url_for('admin.tour_table') }}">
+                  Manage tour model
+                </a>
+              </li>
+              {% endif %}
               <li class="nav-item">
                 <a class="nav-link {{ 'active' if active_page == 'albums' }}" href="{{ url_for('album.list') }}">
                   {{ _('See albums') }}

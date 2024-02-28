@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+{% block headline %}Table of {{ resource_name }}{% endblock %}
+{% set active_page = 'admin_' + resource_name %}
+{% block content %}
+<div class="table-responsive">
+  <table class="table table-bordered table-hover table-striped">
+    <tr>
+      {% for col in columns %}
+      <td>
+        <b>{{ col | capitalize }}</b>
+      </td>
+      {% endfor %}
+    </tr>
+    {% for ins in instances %}
+    <tr>
+      {% for col in columns %}
+      <td>
+        {{ ins[col] }}
+      </td>
+      {% endfor %}
+    </tr>
+    {% endfor %}
+  </table>
+</div>
+{% endblock %}

@@ -74,11 +74,13 @@ class User(UserMixin, db.Model):
     password_hash      = db.Column(db.String(255), nullable=False)
     albums             = db.relationship("Album", backref="user", lazy="dynamic", cascade="all, delete-orphan")
     tours              = db.relationship("Tour", backref="user", lazy="dynamic", cascade="all, delete-orphan")
+    is_admin           = db.Column(db.Boolean(), default=False)
 
     def __init__(self, username="", email="", password=""):
         self.username         = username
         self.email            = email
         self.password_hash    = generate_password_hash(password)
+        self.is_admin         = False
 
     def __repr__(self):
         return "<User %r>" % self.username
@@ -94,6 +96,9 @@ class User(UserMixin, db.Model):
 
     def is_tour_owner(self, tour):
         return self.id == tour.user_id
+    
+    def make_admin(self):
+        self.is_admin = True
 
 @login_manager.user_loader
 def load_user(user_id):
