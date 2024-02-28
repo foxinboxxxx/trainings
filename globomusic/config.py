@@ -6,6 +6,7 @@ class Config:
     MAX_CONTENT_LENGTH = 16*1024*1024
     ALLOWED_IMAGE_EXTENSIONS = ["jpeg", "jpg", "png"]
     SQLALCHEMY_TRACK_MODIFICATIONS = False
+    ADMIN_VIEWS = []
 
 class DevelopmentConfig(Config):
     SQLALCHEMY_DATABASE_URI = "sqlite:///" + os.path.join(basedir, "globomantics.sqlite")

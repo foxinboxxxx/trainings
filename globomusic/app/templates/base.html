@@ -39,16 +39,13 @@
               </li>
               {% else %}
               {% if current_user.is_admin %}
-              <li class="nav-item">
-                <a class="nav-link {{ 'active' if active_page == 'admin_album' }}" href="{{ url_for('admin.album_table') }}">
-                  Manage album model
+              {% for view_name in config["ADMIN_VIEWS"] %}
+              <li class="nav-item {% if loop.last %}mb-3{% endif %}">
+                <a class="nav-link {{ 'active' if active_page == 'admin_'+view_name }}" href="{{ url_for('admin.{}_table'.format(view_name)) }}">
+                  Manage {{ view_name }} model
                 </a>
               </li>
-              <li class="nav-item">
-                <a class="nav-link {{ 'active' if active_page == 'admin_tour' }}" href="{{ url_for('admin.tour_table') }}">
-                  Manage tour model
-                </a>
-              </li>
+              {% endfor %}
               {% endif %}
               <li class="nav-item">
                 <a class="nav-link {{ 'active' if active_page == 'albums' }}" href="{{ url_for('album.list') }}">
@@ -105,5 +102,6 @@
     <script src="{{ url_for('static', filename='js/jquery-3.4.1.min.js') }}"></script>
     <script src="{{ url_for('static', filename='js/popper.min.js') }}"></script>
     <script src="{{ url_for('static', filename='js/bootstrap.min.js') }}"></script>
+    {% block javascript %}{% endblock %}
   </body>
 </html>

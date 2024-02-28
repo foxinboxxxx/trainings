@@ -1,7 +1,7 @@
 # Imports from Flask
 from flask import Flask
 # Other imports
-import os
+import os, re
 import config
 # Import global extension variables
 from app.extensions import *
@@ -43,6 +43,12 @@ def create_app(config_env=app_env):
     app.register_blueprint(tour, url_prefix="/tour")
     from app.admin.views import admin
     app.register_blueprint(admin, url_prefix="/admin")
+
+    # Update resource links for admins
+    app.config["ADMIN_VIEWS"] = [re.search('admin.(.*)_table', p).group(1)
+                                for p in list(app.view_functions.keys())
+                                if re.search('admin.(.*)_table', p)]
+
 
     # Imports for error pages
     from app.errors import page_not_found
