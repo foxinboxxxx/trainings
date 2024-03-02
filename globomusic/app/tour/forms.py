@@ -4,7 +4,6 @@ from wtforms.fields import StringField, SubmitField, TextAreaField
 from wtforms.fields.html5 import DateField
 from wtforms.validators import InputRequired, DataRequired, Length, ValidationError
 # Extension for implementing translations
-from flask_babel import _
 from flask_babel import lazy_gettext as _l
 
 
