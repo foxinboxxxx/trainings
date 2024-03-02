@@ -6,6 +6,8 @@ import config
 # Import global extension variables
 from app.extensions import *
 
+from app.signals import register_signals
+
 basedir = os.path.abspath(os.path.dirname(__file__))
 app_env = os.environ.get("FLASK_ENV")
 
@@ -32,6 +34,9 @@ def create_app(config_env=app_env):
 
     # Initializing extensions
     init_extensions(app)
+
+    # Registering signals
+    register_signals(app)
 
     # Language url prefix
     lang_list = ",".join(app.config["LANGUAGES"])
