@@ -1,0 +1,5 @@
+// Bootstrap CSS requires this file for some reason. 
+// And if we don't create this empty file, we will always get an error inside of the console.
+// You don't have to do this. 
+// The application will work just fine without it. 
+// But I don't like to have the console log cluttered with useless information.
