@@ -7,6 +7,7 @@ from flask_login import LoginManager
 # Extension for implementing translations
 from flask_babel import Babel
 from flask_babel import lazy_gettext as _l
+from flask import g
 
 # extensions as globals
 db = SQLAlchemy()
@@ -23,3 +24,8 @@ def init_extensions(app):
     login_manager.session_protection = "strong"
     login_manager.login_message = _l("You need to be logged in to access this page.")
     login_manager.login_message_category = "danger"
+
+@babel.localeselector
+def get_locale():
+    return g.lang
+
