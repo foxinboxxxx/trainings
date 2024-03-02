@@ -15,6 +15,8 @@ def create_app(config_env=app_env):
     # The request context is pushed whenever a new request comes in.
     app = Flask(__name__)
     app.config.from_object("config.{}Config".format(app.env.capitalize()))
+    #app.config.from_object("config.{}Config".format(config_env.capitalize()))
+
     # app.config.from_mapping(
     #     SECRET_KEY=os.environ.get("FLASK_SECRET_KEY") or "prc9FWjeLYh_KsPGm0vJcg",
     #     SQLALCHEMY_DATABASE_URI="sqlite:///"+ os.path.join(basedir, "globomantics.sqlite"),
@@ -23,7 +25,7 @@ def create_app(config_env=app_env):
     #     IMAGE_UPLOADS=os.path.join(basedir, "uploads"),
     #     ALLOWED_IMAGE_EXTENSIONS=["jpeg", "jpg", "png"]
     # )
-    print("Config " + str("config.{}Config".format(config_env.capitalize())))
+    #print("Config " + str("config.{}Config".format(config_env.capitalize())))
 
     # DON'T DO THIS EVER EVER!!!!
     # app.config["ENV"] = "testing"
