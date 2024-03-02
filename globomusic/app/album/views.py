@@ -13,17 +13,23 @@ from werkzeug.utils import secure_filename
 # Other imports
 import os
 import datetime
-from app import db
+from app import db, cache
 from app.models import Album
 from app.album.forms import CreateAlbumForm, UpdateAlbumForm
+from sqlalchemy.orm import joinedload
 
 album=Blueprint("album", __name__, template_folder="templates")
+
+@cache.cached(timeout=60, key_prefix="list_of_albums")
+def get_albums():
+    # print("Getting albums from the database")
+    return Album.query.options(joinedload(Album.user)).all()
 
 # Route for listing albums
 @album.route("/")
 @login_required
 def list():
-    albums = Album.query.all()
+    albums = get_albums()
     return render_template("list_albums.html", albums=albums)
 
 # Route for creating new albums
