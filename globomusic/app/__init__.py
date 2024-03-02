@@ -39,6 +39,8 @@ def create_app(config_env=app_env):
 
     # Avoid working outside of application context error
     # Imports from subpackages (views)
+    from app.main.views import root
+    app.add_url_rule("/", view_func=root)
     with app.app_context():
         from app.album.views import album
         app.register_blueprint(album, url_prefix=f"/{lang_prefix}/album")
