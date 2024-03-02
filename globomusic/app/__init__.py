@@ -60,4 +60,8 @@ def create_app(config_env=app_env):
     from app.filters import date_format
     app.add_template_filter(date_format)
 
+    # Define URL processors
+    from app.url_processors import url_processors
+    app.register_blueprint(url_processors)
+
     return app
