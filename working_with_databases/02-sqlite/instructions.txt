@@ -1,0 +1,2 @@
+python .\main.py add-investment --coin_id=solana --currency=BPD --amount=100
+python .\main.py get-investment --coin_id=bitcoin --currency=USD
