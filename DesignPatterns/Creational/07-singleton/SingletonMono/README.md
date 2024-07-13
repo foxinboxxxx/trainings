@@ -1,0 +1,1 @@
+MonoState contains a dictionary containing the single state for all instances. In the new method, the instance's dict object, where an instance's state is stored, is redirected to the single state dictionary maintained at the class level. In this way, no matter how many new instances you create of a MonoState derived class, they all share the same state

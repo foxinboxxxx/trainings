@@ -1,0 +1,1 @@
+ Introducing a PrototypeManager, though, lets you separate the concerns of building and cloning the prototypes and is suitable for building tens, hundreds, or even thousands of prototypes, and then retrieving them by key.

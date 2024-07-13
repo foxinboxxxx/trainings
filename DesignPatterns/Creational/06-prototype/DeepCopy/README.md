@@ -1,0 +1,4 @@
+- Deep cloning constructs a new compound object and then recursively inserts copies into it of the objects found in the original.
+- May cause a recursive loop
+- May copy too much
+- But most of the time shallow cloning is enough
