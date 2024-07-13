@@ -30,7 +30,7 @@ class WatchlistCoin(EmbeddedDocument):
     note = fields.StringField()
     date_added = fields.DateField(default=datetime.datetime.now().date)
 
-
+# Embedded Document lists with MongoEngine
 class Watchlist(Document):
     name = fields.StringField(max_length=256)
     metadata = fields.EmbeddedDocumentField(WatchlistMetadata)
@@ -145,6 +145,7 @@ def view_investment():
 @click.option("--description", help="The description of the watchlist", prompt=True)
 @click.option("--currency", help="The currency to display coin prices in", prompt=True)
 def add_watchlist(name, description, currency):
+    # Creating Documents with MongoEngine
     metadata = WatchlistMetadata(currency=currency, description=description)
     watchlist = Watchlist(name=name, metadata=metadata, coins=[])
     watchlist.save()
@@ -191,3 +192,10 @@ cli.add_command(view_investment)
 if __name__ == "__main__":
     connect("portfolio_me")
     cli()
+
+# python watchlists.py clear-data
+# python watchlists.py seed-data
+# python watchlists.py view-watchlist
+# python watchlists.py add-watchlist
+# python watchlists.py add-coin
+# python watchlists.py remove-coin

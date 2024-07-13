@@ -7,7 +7,7 @@ import click
 
 from utils import get_coin_prices
 
-
+# Data Modelling with MongoEngine
 class Investment(Document):
     coin = fields.StringField(max_length=32)
     currency = fields.StringField(max_length=3)
@@ -20,6 +20,7 @@ class Investment(Document):
 
 
 def _select_investment():
+    # each field you want to include shall be set to 1 as keyword arg
     investment_coins = Investment.objects.all().fields(coin=1)
     for index, coin in enumerate(investment_coins):
         print(f"{index + 1}: {coin.coin}")

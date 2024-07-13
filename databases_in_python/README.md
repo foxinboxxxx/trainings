@@ -1,1 +1,1 @@
-# Playing around with DBs in Python
+# Playing around with Databases in Python to create crypto portfolio
