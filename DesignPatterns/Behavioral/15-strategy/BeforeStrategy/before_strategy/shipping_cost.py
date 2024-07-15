@@ -1,5 +1,6 @@
 from before_strategy import Shipper
 
+# adding new post option by adding new cost and elif - violates Open/closed principle
 class ShippingCost(object):
     def shipping_cost(self, order):
         if order.shipper == Shipper.FEDEX:

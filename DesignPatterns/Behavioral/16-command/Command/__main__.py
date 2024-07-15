@@ -16,6 +16,7 @@ def main():
     command.execute()
 
 def get_commands():
+    # dictionary where the keys are the names of the commands and the values are the class references.
     commands = (CreateOrder, UpdateOrder, ShipOrder)
     return dict([cls.name, cls] for cls in commands)
 

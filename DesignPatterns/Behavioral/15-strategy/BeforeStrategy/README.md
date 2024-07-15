@@ -1,0 +1,2 @@
+# Problems discovered
+ For one thing, it violates the Single Responsibility Principle. An order should probably not be concerned with how the products will eventually be shipped. Secondly, it violates the Open/Closed Principle, since I'd have to modify the shipping cost class to add new shipping methods. It violates the Dependency Inversion Principle, since I'm programming to a concrete class and method. That's the shipping cost class and its shipping cost method. I also have a long list of if/elif/else statements that's a bit fragile and not very attractive
