@@ -1,0 +1,2 @@
+# Problem
+It's in the Tree class, I now have two similar iterations in two methods, one for the existing get_oldest method and now another one for the new pretty_print method, even though the iteration is done differently. There is another more subtle problem, though. The Tree and Person classes need to manage the people and their family trees. They don't also need to do pretty printing or oldest member processing; in fact, it would be far better if these operations could be done outside these classes entirely, while leaving the door open for more such functions

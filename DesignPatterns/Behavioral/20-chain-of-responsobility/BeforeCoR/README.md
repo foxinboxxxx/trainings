@@ -1,0 +1,2 @@
+# Problems
+The main program couples the requests with the handlers in the for‑each loop. Decoupling these somehow would help future proof that program. The foreach loop has direct references to the handlers, which makes it harder to add new ones or remove deprecated handlers. And this approach dictates the sequence of the handler operations. Imagine I had a better handler for fish that clean the tank and put food in it.
